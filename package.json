@@ -1,0 +1,35 @@
+{
+  "name": "match-values",
+  "version": "0.0.1",
+  "description": "Pattern matching on values",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prebuild": "rm -rf dist",
+    "build": "tsc",
+    "prepublish": "yarn build",
+    "test": "ts-node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phanhoangloc/match-values.git"
+  },
+  "keywords": [
+    "pattern-matching",
+    "match",
+    "pattern"
+  ],
+  "author": "Loc Phan <phanhoangloc@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/phanhoangloc/match-values/issues"
+  },
+  "homepage": "https://github.com/phanhoangloc/match-values#readme",
+  "devDependencies": {
+    "ts-node": "7.0.1",
+    "typescript": "3.1.1"
+  }
+}
