@@ -11,6 +11,7 @@ Table of Contents
    * [Match a pattern to get a function](#match-a-pattern-to-get-a-function)
 * [Advanced Usage](#advanced-usage)
    * [Match a pattern lazily (useful for function composition)](#match-a-pattern-lazily-useful-for-function-composition)
+   * [Match an array](#match-an-array)
 * [Licensing](#licensing)
 
 

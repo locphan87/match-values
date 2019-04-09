@@ -26,13 +26,17 @@ const matchArray = (value: any[], pattern: any[]) => {
   const matchingCase = pattern.find(fn => {
     const args: IParam[] = reflector(fn).params
     const hasSameLength = value.length === args.length
+    const hasDefaultCase = args.length === 1 && args[0].name === '_'
 
-    if (hasSameLength || args[0].name === '_') {
+    if (hasDefaultCase) return true
+
+    if (hasSameLength) {
       // set a default value if the value is missing
       params = args.map((item: IParam, index: number) => {
         const element = params[index]
         return element || item.value
       })
+
       return true
     }
 
