@@ -20,7 +20,9 @@
   "keywords": [
     "pattern-matching",
     "match",
-    "pattern"
+    "pattern",
+    "javascript",
+    "typescript"
   ],
   "author": "Loc Phan <phanhoangloc@gmail.com>",
   "license": "MIT",

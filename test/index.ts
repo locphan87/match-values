@@ -10,10 +10,10 @@ const pattern1 = {
 console.assert(match('title', pattern1) === 16, 'Failed to match the title')
 console.assert(match('unknown', pattern1) === 13, 'Failed to match the default case')
 
-const fontSize3 = ['h1', 'h2', 'x'].map(lazyMatch(pattern1))
-console.assert(fontSize3[0] === 20, 'Failed to match a pattern lazily')
-console.assert(fontSize3[1] === 18, 'Failed to match a pattern lazily')
-console.assert(fontSize3[2] === 13, 'Failed to match a pattern lazily')
+const fontSize = ['h1', 'h2', 'x'].map(lazyMatch(pattern1))
+console.assert(fontSize[0] === 20, 'Failed to match a pattern lazily')
+console.assert(fontSize[1] === 18, 'Failed to match a pattern lazily')
+console.assert(fontSize[2] === 13, 'Failed to match a pattern lazily')
 
 const pattern2 = [
   (a, b = 10, c) => {

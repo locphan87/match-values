@@ -9,7 +9,10 @@ Table of Contents
 * [Usage](#usage)
    * [Match a pattern to get a numberic value](#match-a-pattern-to-get-a-numberic-value)
    * [Match a pattern to get a function](#match-a-pattern-to-get-a-function)
+* [Advanced Usage](#advanced-usage)
    * [Match a pattern lazily (useful for function composition)](#match-a-pattern-lazily-useful-for-function-composition)
+* [Licensing](#licensing)
+
 
 ## Getting started
 
@@ -21,9 +24,9 @@ $ npm install match-values
 
 The result of each case could be anything: primitive values, objects, functions,...
 
-### Match a pattern to get a numberic value
+### Match a pattern to get a numeric value
 
-```js
+```ts
 import match from 'match-values'
 
 const pattern = {
@@ -40,7 +43,7 @@ const fontSize = match(fontStyle, pattern)
 
 ### Match a pattern to get a function
 
-```js
+```ts
 import match from 'match-values'
 
 const handleError = match(error, {
@@ -51,9 +54,11 @@ const handleError = match(error, {
 handleError()
 ```
 
+## Advanced Usage
+
 ### Match a pattern lazily (useful for function composition)
 
-```js
+```ts
 import { lazyMatch } from 'match-values'
 
 const fontSizes = ['h1', 'h2', 'x'].map(lazyMatch(pattern))
@@ -68,3 +73,30 @@ getFinalFontSize({
   size: 'description'
 }) // 15
 ```
+
+### Match an array
+
+```ts
+import { matchArray } from 'match-values'
+
+const pattern = [
+  (a, b = 10, c) => {
+    return a + b + c
+  },
+  (a, b) => {
+    return a + b
+  },
+  a => a,
+  _ => 0
+]
+matchArray([1, 2, 3], pattern) // 6
+matchArray([1, undefined, 3], pattern) // 14
+matchArray([1, 2], pattern) // 3
+matchArray([1, 2, 3], pattern) // 6
+matchArray([50], pattern) // 50
+matchArray([], pattern) // 0
+```
+
+## Licensing
+
+MIT
