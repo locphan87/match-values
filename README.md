@@ -5,15 +5,17 @@ Apply pattern matching on values
 Table of Contents
 =================
 
-* [Getting started](#getting-started)
-* [Usage](#usage)
-   * [Match a pattern to get a numberic value](#match-a-pattern-to-get-a-numberic-value)
-   * [Match a pattern to get a function](#match-a-pattern-to-get-a-function)
-* [Advanced Usage](#advanced-usage)
-   * [Match a pattern lazily (useful for function composition)](#match-a-pattern-lazily-useful-for-function-composition)
-   * [Match an array](#match-an-array)
-* [Licensing](#licensing)
-
+* [Match values](#match-values)
+* [Table of Contents](#table-of-contents)
+  * [Getting started](#getting-started)
+  * [Usage](#usage)
+     * [Match a pattern to get a primitive value](#match-a-pattern-to-get-a-primitive-value)
+     * [Match a pattern to get a function](#match-a-pattern-to-get-a-function)
+  * [Advanced Usage](#advanced-usage)
+     * [Match a pattern lazily (useful for function composition)](#match-a-pattern-lazily-useful-for-function-composition)
+     * [Match an array](#match-an-array)
+     * [Match an object](#match-an-object)
+  * [Licensing](#licensing)
 
 ## Getting started
 
