@@ -1,10 +1,10 @@
 import isEqual from 'lodash.isequal'
 
-// a object of branch and matching value
+// an object of branch and matching value
 interface PatternO {
   [branch: string]: any
 }
-// a tuple of branch and matching value
+// a 2-tuple of branch and matching value
 type PatternT = [any, any]
 
 // Match literal values
@@ -33,17 +33,17 @@ const matchValue = (value: string | number, pattern: PatternO) => {
 // Match objects and arrays
 const matchStructure = (value: any, pattern: PatternT[]) => {
   const lastIndex = pattern.length - 1
-  const hasCorrectCase = (PatternT: PatternT, index: number) => {
-    if (!PatternT || !Array.isArray(PatternT) || PatternT.length !== 2) {
+  const hasCorrectCase = (_pattern: PatternT, index: number) => {
+    if (!_pattern || !Array.isArray(_pattern) || _pattern.length !== 2) {
       throw new Error(
         `Invalid branch ${JSON.stringify(
-          PatternT
+          _pattern
         )}. Each branch must be an array of 2 items.`
       )
     }
-    const [pattern] = PatternT
-    if (isEqual(pattern, value)) return true
-    if (pattern === '_') {
+    const [branch] = _pattern
+    if (isEqual(branch, value)) return true
+    if (branch === '_') {
       if (index !== lastIndex) {
         throw new Error(`'_' must be the last branch.`)
       }
