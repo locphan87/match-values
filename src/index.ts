@@ -21,6 +21,10 @@ const match = (value: string, pattern: IPattern) => {
 
   return pattern[matchingCase || defaultCase]
 }
+// TODO: Advanced match for objects and arrays
+const matchA = (value: any, pattern: any) => {
+  return value[0] || pattern
+}
 const matchArray = (value: any[], pattern: any[]) => {
   let params = [...value]
   const matchingCase = pattern.find(fn => {
@@ -52,5 +56,5 @@ const matchArray = (value: any[], pattern: any[]) => {
 
 const lazyMatch = (pattern: IPattern) => (value: string) => match(value, pattern)
 
-export { lazyMatch, matchArray }
+export { lazyMatch, matchArray, matchA }
 export default match
