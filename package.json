@@ -8,6 +8,7 @@
     "dist"
   ],
   "scripts": {
+    "prettier": "prettier --write '{src,test}/**/*.ts'",
     "prebuild": "rm -rf dist",
     "build": "tsc",
     "prepublish": "yarn build",
@@ -33,11 +34,12 @@
   "devDependencies": {
     "@types/jest": "24.0.11",
     "jest": "24.7.1",
+    "prettier": "1.17.0",
     "ts-jest": "24.0.2",
     "ts-node": "7.0.1",
     "typescript": "3.4.5"
   },
   "dependencies": {
-    "js-function-reflector": "2.0.3"
+    "lodash.isequal": "4.5.0"
   }
 }

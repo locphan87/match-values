@@ -1,60 +1,76 @@
-import reflector from 'js-function-reflector'
+import isEqual from 'lodash.isequal'
 
-interface IPattern {
+// a object of branch and matching value
+interface PatternO {
   [branch: string]: any
 }
-interface IParam {
-  type: string,
-  name: string,
-  value?: any
-}
+// a tuple of branch and matching value
+type PatternT = [any, any]
 
-const match = (value: string, pattern: IPattern) => {
-  const hasKey = (key: string) => String(value) === key
-  const matchingCase = Object.keys(pattern).find(hasKey)
-  const defaultCase = '_'
-  const hasDefault = pattern.hasOwnProperty(defaultCase)
+// Match literal values
+const matchValue = (value: string | number, pattern: PatternO) => {
+  const cases = Object.keys(pattern)
+  const lastIndex = cases.length - 1
+  const hasCorrectCase = (key: string, index: number) => {
+    if (String(value) === key) return true
+    if (key === '_') {
+      if (index !== lastIndex) {
+        throw new Error(`'_' must be the last branch.`)
+      }
+      return true
+    }
+    return false
+  }
+  const matchingCase = cases.find(hasCorrectCase)
 
-  if (!matchingCase && !hasDefault) {
+  if (!matchingCase) {
     throw new ReferenceError(`Match error for value: ${value}`)
   }
 
-  return pattern[matchingCase || defaultCase]
+  return pattern[matchingCase]
 }
-// TODO: Advanced match for objects and arrays
-const matchA = (value: any, pattern: any) => {
-  return value[0] || pattern
-}
-const matchArray = (value: any[], pattern: any[]) => {
-  let params = [...value]
-  const matchingCase = pattern.find(fn => {
-    const args: IParam[] = reflector(fn).params
-    const hasSameLength = value.length === args.length
-    const hasDefaultCase = args.length === 1 && args[0].name === '_'
 
-    if (hasDefaultCase) return true
-
-    if (hasSameLength) {
-      // set a default value if the value is missing
-      params = args.map((item: IParam, index: number) => {
-        const element = params[index]
-        return element || item.value
-      })
-
+// Match objects and arrays
+const matchStructure = (value: any, pattern: PatternT[]) => {
+  const lastIndex = pattern.length - 1
+  const hasCorrectCase = (PatternT: PatternT, index: number) => {
+    if (!PatternT || !Array.isArray(PatternT) || PatternT.length !== 2) {
+      throw new Error(
+        `Invalid branch ${JSON.stringify(
+          PatternT
+        )}. Each branch must be an array of 2 items.`
+      )
+    }
+    const [pattern] = PatternT
+    if (isEqual(pattern, value)) return true
+    if (pattern === '_') {
+      if (index !== lastIndex) {
+        throw new Error(`'_' must be the last branch.`)
+      }
       return true
     }
-
     return false
-  })
+  }
+  const matchingCase = pattern.find(hasCorrectCase)
 
-  if (typeof matchingCase !== 'function') {
+  if (!matchingCase) {
     throw new ReferenceError(`Match error for value: ${JSON.stringify(value)}`)
   }
 
-  return matchingCase(...params)
+  return matchingCase[1]
 }
 
-const lazyMatch = (pattern: IPattern) => (value: string) => match(value, pattern)
+// General matching for any data type
+const match = (value: any, pattern: any) => {
+  if (Array.isArray(pattern)) {
+    return matchStructure(value, pattern)
+  }
 
-export { lazyMatch, matchArray, matchA }
+  return matchValue(value, pattern)
+}
+
+// Match lazily a pattern for function composition
+const lazyMatch = (pattern: any) => (value: any) => match(value, pattern)
+
+export { match, lazyMatch, matchValue, matchStructure, PatternT }
 export default match
