@@ -1,4 +1,4 @@
-import match, { lazyMatch } from '../src/'
+import match, { lazyMatch, _ } from '../src/'
 
 describe('match', () => {
   const pattern = {
@@ -35,38 +35,18 @@ describe('match', () => {
       expect(fontSize[2]).toBe(13)
     })
   })
-  describe('match array', () => {
-    const inputs = [[1], [1, 2], [1, 2, 3]]
+  describe('match conditions', () => {
     const pattern2 = [
-      [inputs[0], 'x1'],
-      [inputs[1], 'x2'],
-      [inputs[2], 'x3'],
-      ['_', 'default']
+      [(x) => x === 5, 'ok'],
+      [(x) => x > 5, 'great'],
+      [_, 'default']
     ]
-    test('should match correct array', () => {
-      expect(match([1], pattern2)).toEqual('x1')
-      expect(match([1, 2], pattern2)).toEqual('x2')
-      expect(match([1, 2, 3], pattern2)).toEqual('x3')
+    test('should match correct conditions', () => {
+      expect(match(5, pattern2)).toEqual('ok')
+      expect(match(7, pattern2)).toEqual('great')
     })
     test('should match the default case', () => {
-      expect(match([0], pattern2)).toEqual('default')
-    })
-  })
-  describe('match object', () => {
-    const inputs = [{ a: 1 }, { a: 1, b: 2 }, { a: 1, b: 2, c: 3 }]
-    const pattern3 = [
-      [inputs[0], 'x1'],
-      [inputs[1], 'x2'],
-      [inputs[2], 'x3'],
-      ['_', 'default']
-    ]
-    test('should match correct object', () => {
-      expect(match(inputs[0], pattern3)).toEqual('x1')
-      expect(match(inputs[1], pattern3)).toEqual('x2')
-      expect(match(inputs[2], pattern3)).toEqual('x3')
-    })
-    test('should match the default case', () => {
-      expect(match({}, pattern3)).toEqual('default')
+      expect(match(4, pattern2)).toEqual('default')
     })
   })
 })
