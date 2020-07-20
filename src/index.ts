@@ -1,11 +1,12 @@
-import isEqual from 'lodash.isequal'
-
 // an object of branch and matching value
 interface PatternO {
   [branch: string]: any
 }
 // a 2-tuple of branch and matching value
 type PatternT = [any, any]
+
+// The default case / the last branch
+const _ = Symbol('else')
 
 // Match literal values
 const matchValue = (value: string | number, pattern: PatternO) => {
@@ -15,7 +16,7 @@ const matchValue = (value: string | number, pattern: PatternO) => {
     if (String(value) === key) return true
     if (key === '_') {
       if (index !== lastIndex) {
-        throw new Error(`'_' must be the last branch.`)
+        throw new Error(`_ must be the last branch.`)
       }
       return true
     }
@@ -30,8 +31,8 @@ const matchValue = (value: string | number, pattern: PatternO) => {
   return pattern[matchingCase]
 }
 
-// Match objects and arrays
-const matchStructure = (value: any, pattern: PatternT[]) => {
+// Match conditions
+const matchCond = (value: any, pattern: PatternT[]) => {
   const lastIndex = pattern.length - 1
   const hasCorrectCase = (_pattern: PatternT, index: number) => {
     if (!_pattern || !Array.isArray(_pattern) || _pattern.length !== 2) {
@@ -42,13 +43,17 @@ const matchStructure = (value: any, pattern: PatternT[]) => {
       )
     }
     const [branch] = _pattern
-    if (isEqual(branch, value)) return true
-    if (branch === '_') {
+    if (branch === _) {
       if (index !== lastIndex) {
-        throw new Error(`'_' must be the last branch.`)
+        throw new Error(`_ must be the last branch.`)
       }
       return true
     }
+    if (typeof branch !== 'function') {
+      throw new Error('Each branch must contain a predicate.')
+    }
+    if (branch(value) === true) return true
+
     return false
   }
   const matchingCase = pattern.find(hasCorrectCase)
@@ -60,10 +65,10 @@ const matchStructure = (value: any, pattern: PatternT[]) => {
   return matchingCase[1]
 }
 
-// General matching for any data type
+// General matching
 const match = (value: any, pattern: any) => {
   if (Array.isArray(pattern)) {
-    return matchStructure(value, pattern)
+    return matchCond(value, pattern)
   }
 
   return matchValue(value, pattern)
@@ -72,5 +77,5 @@ const match = (value: any, pattern: any) => {
 // Match lazily a pattern for function composition
 const lazyMatch = (pattern: any) => (value: any) => match(value, pattern)
 
-export { match, lazyMatch, matchValue, matchStructure, PatternT }
+export { match, lazyMatch, PatternT, _ }
 export default match

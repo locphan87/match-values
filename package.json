@@ -1,7 +1,7 @@
 {
   "name": "match-values",
   "version": "1.1.0",
-  "description": "Pattern matching on values",
+  "description": "Apply pattern matching in JavaScript",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
   "files": [
@@ -39,7 +39,5 @@
     "ts-node": "7.0.1",
     "typescript": "3.4.5"
   },
-  "dependencies": {
-    "lodash.isequal": "4.5.0"
-  }
+  "dependencies": {}
 }
