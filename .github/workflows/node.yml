@@ -23,25 +23,30 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout Code
+      - name: Checkout code
         uses: actions/checkout@master
 
-      - name: Install Dependencies
+      - name: Install dependencies
         uses: borales/actions-yarn@v2.3.0
         with:
           cmd: install
 
-      - name: Run Unit Tests
+      - name: Run unit tests
         uses: borales/actions-yarn@v2.3.0
         with:
           cmd: test
 
-      - name: Copy Artifacts
+      - name: Comment on the coverage report
+        uses: romeovs/lcov-reporter-action@v0.2.16
+        with:
+          lcov-file: ./coverage/lcov.info
+
+      - name: Copy artifacts
         run: |
           mkdir public
           mv test-report.html public/index.html
 
-      - name: Publish Test Results
+      - name: Publish test results
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
