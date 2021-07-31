@@ -37,7 +37,10 @@ jobs:
           cmd: test
 
       - name: Copy Artifacts
-        run: mkdir public && mv test-report.html public/
+        run: |
+          mkdir public
+          echo "locphan87.github.io" > public/CNAME
+          mv test-report.html public/index.html
 
       - name: Publish Test Results
         uses: peaceiris/actions-gh-pages@v3
