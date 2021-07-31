@@ -1,5 +1,7 @@
 # Match values
 
+![match-values workflow](https://github.com/locphan87/match-values/actions/workflows/node.yml/badge.svg)
+
 Apply pattern matching in JavaScript
 
 ## Getting started
