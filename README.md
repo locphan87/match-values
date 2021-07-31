@@ -88,6 +88,10 @@ match(5, pattern) // correct
 match(1, pattern) // greater
 ```
 
+## Code Coverage
+
+[Test Report](https://locphan.dev/match-values/)
+
 ## Licensing
 
 MIT
