@@ -39,7 +39,6 @@ jobs:
       - name: Copy Artifacts
         run: |
           mkdir public
-          echo "locphan87.github.io" > public/CNAME
           mv test-report.html public/index.html
 
       - name: Publish Test Results
