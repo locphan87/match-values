@@ -8,12 +8,13 @@
     "dist"
   ],
   "scripts": {
-    "prettier": "prettier --write '{src,test}/**/*.ts'",
+    "format": "prettier --write '{src,test}/**/*.ts'",
     "prebuild": "rm -rf dist",
     "build": "tsc",
     "prepublish": "yarn build",
     "test": "jest",
-    "coverage": "open ./coverage/lcov-report/index.html"
+    "test:cov": "open ./coverage/lcov-report/index.html",
+    "test:report": "open ./test-report.html"
   },
   "repository": {
     "type": "git",
@@ -23,10 +24,9 @@
     "pattern-matching",
     "match",
     "pattern",
-    "javascript",
-    "typescript"
+    "javascript"
   ],
-  "author": "Loc Phan <locphan87@gmail.com>",
+  "author": "Loc Phan <phanhoangloc@gmail.com>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/locphan87/match-values/issues"
@@ -38,6 +38,7 @@
   "devDependencies": {
     "@types/jest": "26.0.24",
     "jest": "27.0.6",
+    "jest-html-reporter": "^3.4.1",
     "prettier": "2.3.2",
     "ts-jest": "27.0.4",
     "ts-node": "10.1.0",
