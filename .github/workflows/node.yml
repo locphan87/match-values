@@ -6,9 +6,9 @@ name: CI
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -23,15 +23,24 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@master
-        
-      - name: Install dependencies
+
+      - name: Install Dependencies
         uses: borales/actions-yarn@v2.3.0
         with:
           cmd: install
-     
-      - name: Run unit tests
+
+      - name: Run Unit Tests
         uses: borales/actions-yarn@v2.3.0
         with:
           cmd: test
+
+      - name: Copy Artifacts
+      - run: mkdir public && mv test-report.html public/
+
+      - name: Publish Test Results
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
