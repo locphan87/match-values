@@ -76,7 +76,7 @@ const getFinalFontSize = compose(
 ### Match conditions
 
 ```ts
-import match, { _ } from 'match-values'
+import { match, _ } from 'match-values'
 
 const pattern = {
   [x => x > 5, 'smaller'],
