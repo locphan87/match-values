@@ -90,7 +90,7 @@ match(1, pattern) // greater
 
 ## Code Coverage
 
-[Test Report](https://locphan.dev/match-values/)
+[Test Report](https://locphan87.github.io/match-values/)
 
 ## Licensing
 
