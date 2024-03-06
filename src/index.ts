@@ -3,10 +3,10 @@ interface PatternO {
   [branch: string]: any
 }
 // a 2-tuple of branch and matching value
-type PatternT = [any, any]
+export type PatternT = [any, any]
 
 // The default case - last branch of a pattern
-const _ = Symbol('else')
+const last = Symbol('last')
 
 // Match literal values
 const matchValue = (value: string | number, pattern: PatternO) => {
@@ -32,7 +32,7 @@ const matchValue = (value: string | number, pattern: PatternO) => {
 }
 
 // Match conditions
-const matchCond = (value: any, pattern: any[]) => {
+const matchCond = (value: any, pattern: PatternT[]) => {
   const lastIndex = pattern.length - 1
   const hasCorrectCase = (_pattern: PatternT, index: number) => {
     if (!_pattern || !Array.isArray(_pattern) || _pattern.length !== 2) {
@@ -43,7 +43,7 @@ const matchCond = (value: any, pattern: any[]) => {
       )
     }
     const [branch] = _pattern
-    if (branch === _) {
+    if (branch === last) {
       if (index !== lastIndex) {
         throw new Error(`_ must be the last branch.`)
       }
@@ -68,7 +68,7 @@ const matchCond = (value: any, pattern: any[]) => {
 }
 
 // General matching
-const match = (value: any, pattern: any) => {
+const match = (value: any, pattern: PatternO | PatternT[]) => {
   if (Array.isArray(pattern)) {
     return matchCond(value, pattern)
   }
@@ -77,7 +77,8 @@ const match = (value: any, pattern: any) => {
 }
 
 // Match lazily a pattern for function composition
-const lazyMatch = (pattern: any) => (value: any) => match(value, pattern)
+const lazyMatch = (pattern: PatternO | PatternT[]) => (value: any) =>
+  match(value, pattern)
 
-export { match, matchCond, lazyMatch, PatternT, _ }
+export { match, matchCond, lazyMatch, last }
 export default match
