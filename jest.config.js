@@ -1,7 +1,6 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
   collectCoverage: true,
+  testMatch: ['**/?(*.)+(spec|test).[j]s?(x)'],
   reporters: [
     'default',
     [

@@ -27,7 +27,6 @@
     "javascript"
   ],
   "author": "Loc Phan <phanhoangloc@gmail.com>",
-  "license": "MIT",
   "bugs": {
     "url": "https://github.com/locphan87/match-values/issues"
   },
@@ -36,13 +35,13 @@
     "registry": "https://npm.pkg.github.com/locphan87"
   },
   "devDependencies": {
-    "@types/jest": "26.0.24",
-    "jest": "27.0.6",
-    "jest-html-reporter": "^3.4.1",
-    "prettier": "2.3.2",
-    "ts-jest": "27.0.4",
-    "ts-node": "10.1.0",
-    "typescript": "4.3.5"
+    "@types/jest": "29.5.12",
+    "@types/node": "^20.11.24",
+    "jest": "29.7.0",
+    "jest-html-reporter": "^3.10.2",
+    "prettier": "3.2.5",
+    "typescript": "5.3.3"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "license": "MIT"
 }

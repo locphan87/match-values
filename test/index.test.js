@@ -1,4 +1,4 @@
-import match, { lazyMatch, _, matchCond } from '../src/'
+const { match, lazyMatch, _, matchCond } = require('../dist/index')
 
 describe('match', () => {
   const pattern = {
