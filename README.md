@@ -15,8 +15,11 @@ $ npm install match-values
 - Syntax: `match(searchKey, pattern)`
 - It can match literal values or conditions (predicate functions)
 - The default case must be the last branch of a pattern
-  - `match`: use `'_'`
-  - `matchCond`: use `last`
+
+Function | Default Case
+---|---
+match | `_`
+matchCond | `last`
 
 ### Match a pattern to get a primitive value
 

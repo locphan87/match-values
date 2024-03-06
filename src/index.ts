@@ -71,12 +71,12 @@ const matchCond = (searchKey: SearchKey, pattern: PatternT[]) => {
 }
 
 // General matching
-const match = (key: SearchKey, pattern: PatternO | PatternT[]) => {
+const match = (searchKey: SearchKey, pattern: PatternO | PatternT[]) => {
   if (Array.isArray(pattern)) {
-    return matchCond(key, pattern)
+    return matchCond(searchKey, pattern)
   }
 
-  return matchValue(key, pattern)
+  return matchValue(searchKey, pattern)
 }
 
 // Match lazily a pattern for function composition
