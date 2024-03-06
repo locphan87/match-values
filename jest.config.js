@@ -6,7 +6,7 @@ module.exports = {
     [
       './node_modules/jest-html-reporter',
       {
-        pageTitle: 'Match Values - Test Report'
+        pageTitle: 'Match Values - Test Summary Report'
       }
     ]
   ]
