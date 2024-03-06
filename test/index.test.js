@@ -70,7 +70,7 @@ describe('match', () => {
       try {
         match('f', errorPattern.valueNoMatch)
       } catch (e) {
-        expect(e.message).toEqual('Match error for value: f')
+        expect(e.message).toEqual('Match error for search key: f')
       }
     })
   })
@@ -113,7 +113,7 @@ describe('match', () => {
       try {
         matchCond(1, errorPattern.condNoMatch)
       } catch (e) {
-        expect(e.message).toEqual('Match error for value: 1')
+        expect(e.message).toEqual('Match error for search key: 1')
       }
     })
   })

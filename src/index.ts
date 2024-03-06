@@ -1,19 +1,20 @@
-// an object of branch and matching value
-interface PatternO {
-  [branch: string]: any
-}
-// a 2-tuple of branch and matching value
-export type PatternT = [any, any]
-
 // The default case - last branch of a pattern
 const last = Symbol('last')
 
+type SearchKey = any
+type MatchingValue = any
+type Predicate = (value: any) => boolean
+export interface PatternO {
+  [branch: string]: MatchingValue
+}
+export type PatternT = [Predicate | symbol, MatchingValue]
+
 // Match literal values
-const matchValue = (value: string | number, pattern: PatternO) => {
+const matchValue = (searchKey: string | number, pattern: PatternO) => {
   const cases = Object.keys(pattern)
   const lastIndex = cases.length - 1
   const hasCorrectCase = (key: string, index: number) => {
-    if (String(value) === key) return true
+    if (String(searchKey) === key) return true
     if (key === '_') {
       if (index !== lastIndex) {
         throw new Error(`_ must be the last branch.`)
@@ -25,14 +26,14 @@ const matchValue = (value: string | number, pattern: PatternO) => {
   const matchingCase = cases.find(hasCorrectCase)
 
   if (!matchingCase) {
-    throw new ReferenceError(`Match error for value: ${value}`)
+    throw new ReferenceError(`Match error for search key: ${searchKey}`)
   }
 
   return pattern[matchingCase]
 }
 
 // Match conditions
-const matchCond = (value: any, pattern: PatternT[]) => {
+const matchCond = (searchKey: SearchKey, pattern: PatternT[]) => {
   const lastIndex = pattern.length - 1
   const hasCorrectCase = (_pattern: PatternT, index: number) => {
     if (!_pattern || !Array.isArray(_pattern) || _pattern.length !== 2) {
@@ -54,31 +55,33 @@ const matchCond = (value: any, pattern: PatternT[]) => {
         'The first element of normal branch must be a predicate function.'
       )
     }
-    if (branch(value) === true) return true
+    if (branch(searchKey) === true) return true
 
     return false
   }
   const matchingCase = pattern.find(hasCorrectCase)
 
   if (!matchingCase) {
-    throw new ReferenceError(`Match error for value: ${JSON.stringify(value)}`)
+    throw new ReferenceError(
+      `Match error for search key: ${JSON.stringify(searchKey)}`
+    )
   }
 
   return matchingCase[1]
 }
 
 // General matching
-const match = (value: any, pattern: PatternO | PatternT[]) => {
+const match = (key: SearchKey, pattern: PatternO | PatternT[]) => {
   if (Array.isArray(pattern)) {
-    return matchCond(value, pattern)
+    return matchCond(key, pattern)
   }
 
-  return matchValue(value, pattern)
+  return matchValue(key, pattern)
 }
 
 // Match lazily a pattern for function composition
-const lazyMatch = (pattern: PatternO | PatternT[]) => (value: any) =>
-  match(value, pattern)
+const lazyMatch = (pattern: PatternO | PatternT[]) => (searchKey: SearchKey) =>
+  match(searchKey, pattern)
 
 export { match, matchCond, lazyMatch, last }
 export default match
