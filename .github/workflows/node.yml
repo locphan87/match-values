@@ -26,13 +26,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@master
 
+      - name: Set Node.js 18.x
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18.x
+
       - name: Install dependencies
-        uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v4
         with:
           cmd: install
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Run unit tests
-        uses: borales/actions-yarn@v2.3.0
+        uses: borales/actions-yarn@v4
         with:
           cmd: test
 
