@@ -1,4 +1,4 @@
-const { match, lazyMatch, _, matchCond } = require('../dist/index')
+const { match, lazyMatch, last, matchCond } = require('../dist/index')
 
 describe('match', () => {
   const pattern = {
@@ -17,7 +17,9 @@ describe('match', () => {
     cond: [
       [(x) => x === 5, 'ok'],
       [(x) => x > 5, 'great'],
-      [_, 'default']
+      [(person) => person.name === 'Smith', 'Hello'],
+      [(person) => person.name === 'Marie', 'Bonjour'],
+      [last, 'default']
     ]
   }
   const errorPattern = {
@@ -32,15 +34,15 @@ describe('match', () => {
     },
     condLastBranch: [
       [(x) => x === 5, '5'],
-      [_, 'unknown'],
+      [last, 'unknown'],
       [(x) => x > 5, 'greater']
     ],
     condInvalidBranch: [
       [(x) => x === 5, '5'],
       [2, 'greater'],
-      [_, 'unknown']
+      [last, 'unknown']
     ],
-    condInvalidBranch2: [[(x) => x === 5, '5'], [2], [_, 'unknown']],
+    condInvalidBranch2: [[(x) => x === 5, '5'], [2], [last, 'unknown']],
     condNoMatch: [
       [(x) => x === 5, '5'],
       [(x) => x > 5, 'greater']
@@ -68,24 +70,16 @@ describe('match', () => {
       try {
         match('f', errorPattern.valueNoMatch)
       } catch (e) {
-        expect(e.message).toEqual('Match error for value: f')
+        expect(e.message).toEqual('Match error for search key: f')
       }
-    })
-  })
-  describe('match lazily', () => {
-    const fontSize = ['h1', 'h2', 'x'].map(lazyMatch(pattern.format))
-    test.each([
-      [fontSize[0], 20],
-      [fontSize[1], 18],
-      [fontSize[2], 13]
-    ])('should get the expected result: %p', (ip, expected) => {
-      expect(ip).toBe(expected)
     })
   })
   describe('match conditions', () => {
     test.each([
       [5, 'ok'],
       [7, 'great'],
+      [{ name: 'Smith' }, 'Hello'],
+      [{ name: 'Marie' }, 'Bonjour'],
       [4, 'default']
     ])('should get the expected result: %p -> %p', (ip, expected) => {
       expect(match(ip, pattern.cond)).toBe(expected)
@@ -119,8 +113,18 @@ describe('match', () => {
       try {
         matchCond(1, errorPattern.condNoMatch)
       } catch (e) {
-        expect(e.message).toEqual('Match error for value: 1')
+        expect(e.message).toEqual('Match error for search key: 1')
       }
+    })
+  })
+  describe('match lazily', () => {
+    const fontSize = ['h1', 'h2', 'x'].map(lazyMatch(pattern.format))
+    test.each([
+      [fontSize[0], 20],
+      [fontSize[1], 18],
+      [fontSize[2], 13]
+    ])('should get the expected result: %p', (ip, expected) => {
+      expect(ip).toBe(expected)
     })
   })
 })
