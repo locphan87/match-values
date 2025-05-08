@@ -11,72 +11,70 @@ export type PatternT = [Predicate | symbol, MatchingValue]
 
 // Match literal values
 const matchValue = (searchKey: string | number, pattern: PatternO) => {
-  const cases = Object.keys(pattern)
+  const cases = Object.entries(pattern)
   const lastIndex = cases.length - 1
-  const hasCorrectCase = (key: string, index: number) => {
-    if (String(searchKey) === key) return true
-    if (key === '_') {
-      if (index !== lastIndex) {
-        throw new Error(`_ must be the last branch.`)
-      }
-      return true
+
+  for (let i = 0; i < cases.length; i++) {
+    const [key, value] = cases[i]
+    
+    if (String(searchKey) === key) {
+      return value
     }
-    return false
+    
+    if (key === '_') {
+      if (i !== lastIndex) {
+        throw new Error('_ must be the last branch.')
+      }
+      return value
+    }
   }
-  const matchingCase = cases.find(hasCorrectCase)
 
-  if (!matchingCase) {
-    throw new ReferenceError(`Match error for search key: ${searchKey}`)
-  }
-
-  return pattern[matchingCase]
+  throw new ReferenceError(`Match error for search key: ${searchKey}`)
 }
 
 // Match conditions
 const matchCond = (searchKey: SearchKey, pattern: PatternT[]) => {
   const lastIndex = pattern.length - 1
-  const hasCorrectCase = (_pattern: PatternT, index: number) => {
-    if (!_pattern || !Array.isArray(_pattern) || _pattern.length !== 2) {
+
+  for (let i = 0; i < pattern.length; i++) {
+    const currentPattern = pattern[i]
+
+    // Validate pattern structure
+    if (!currentPattern || !Array.isArray(currentPattern) || currentPattern.length !== 2) {
       throw new Error(
-        `Invalid branch ${JSON.stringify(
-          _pattern
-        )}. Each branch must be an array of 2 items.`
+        `Invalid branch ${JSON.stringify(currentPattern)}. Each branch must be an array of 2 items.`
       )
     }
-    const [branch] = _pattern
-    if (branch === last) {
-      if (index !== lastIndex) {
-        throw new Error(`_ must be the last branch.`)
+
+    const [predicate, value] = currentPattern
+
+    // Handle last (default) case
+    if (predicate === last) {
+      if (i !== lastIndex) {
+        throw new Error('_ must be the last branch.')
       }
-      return true
+      return value
     }
-    if (typeof branch !== 'function') {
-      throw new Error(
-        'The first element of normal branch must be a predicate function.'
-      )
+
+    // Validate predicate
+    if (typeof predicate !== 'function') {
+      throw new Error('The first element of normal branch must be a predicate function.')
     }
-    if (branch(searchKey) === true) return true
 
-    return false
-  }
-  const matchingCase = pattern.find(hasCorrectCase)
-
-  if (!matchingCase) {
-    throw new ReferenceError(
-      `Match error for search key: ${JSON.stringify(searchKey)}`
-    )
+    // Check if predicate matches
+    if (predicate(searchKey) === true) {
+      return value
+    }
   }
 
-  return matchingCase[1]
+  throw new ReferenceError(`Match error for search key: ${JSON.stringify(searchKey)}`)
 }
 
 // General matching
 const match = (searchKey: SearchKey, pattern: PatternO | PatternT[]) => {
-  if (Array.isArray(pattern)) {
-    return matchCond(searchKey, pattern)
-  }
-
-  return matchValue(searchKey, pattern)
+  return Array.isArray(pattern) 
+    ? matchCond(searchKey, pattern)
+    : matchValue(searchKey, pattern)
 }
 
 // Match lazily a pattern for function composition

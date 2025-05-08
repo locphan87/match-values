@@ -1,104 +1,129 @@
-# Match values
+# Match Values
 
 ![match-values workflow](https://github.com/locphan87/match-values/actions/workflows/node.yml/badge.svg)
 
-Apply pattern matching in JavaScript
+A lightweight JavaScript library that makes pattern matching simple and fun! 🎯
 
-## Getting started
+## Installation
 
 ```bash
-$ npm install match-values
+npm install match-values
 ```
 
-## Usage
+## Quick Start
 
-- Syntax: `match(searchKey, pattern)`
-- It can match literal values or conditions (predicate functions)
-- The default case must be the last branch of a pattern
+Match Values provides a simple way to handle conditional logic using pattern matching. Think of it as a super-powered switch statement that's more flexible and easier to read.
 
-Function | Default Case
----|---
-match | `_`
-matchCond | `last`
-
-### Match a pattern to get a primitive value
+### Basic Usage
 
 ```ts
 import { match } from 'match-values'
 
-const pattern = {
+// Simple value matching
+const getFontSize = match('h1', {
   h1: 20,
   h2: 18,
   title: 16,
   description: 14,
-  _: 13
-}
-match('h1', pattern) // 20
-match('h2', pattern) // 18
-match('title', pattern) // 16
-match('description', pattern) // 14
-match('anything', pattern) // 13
+  _: 13  // Default case
+})
+// Returns: 20
+
+// Function matching
+const handleError = match('NOT_FOUND', {
+  NOT_FOUND: () => 'Page not found',
+  TIMEOUT: () => 'Request timed out',
+  _: () => 'Unknown error'
+})
+// Returns: 'Page not found'
 ```
 
-### Match a pattern to get a function
+## Key Features
+
+### 1. Simple Value Matching
 
 ```ts
 import { match } from 'match-values'
 
-const handleError = match(error, {
-  NOT_FOUND: () => showErrorMessage('Page not found'),
-  TIMEOUT: () => showErrorMessage('Page has timed out'),
-  _: NOOP
+const getStatus = match(user.status, {
+  active: 'Welcome back!',
+  pending: 'Please verify your email',
+  blocked: 'Account suspended',
+  _: 'Unknown status'
 })
-handleError()
 ```
 
-## Advanced Usage
+### 2. Function Matching
 
-### Match a pattern lazily (useful for function composition)
+```ts
+import { match } from 'match-values'
+
+const processUser = match(user, {
+  admin: () => showAdminDashboard(),
+  moderator: () => showModeratorPanel(),
+  _: () => showUserDashboard()
+})
+```
+
+### 3. Conditional Matching
+
+```ts
+import { match, last } from 'match-values'
+
+const getMembershipLevel = match(user, {
+  [user => user.points < 100]: 'Bronze',
+  [user => user.points >= 100 && user.points < 500]: 'Silver',
+  [user => user.points >= 500]: 'Gold',
+  [last]: 'Unknown'
+})
+```
+
+### 4. Lazy Matching
+
+Perfect for function composition and array operations:
 
 ```ts
 import { lazyMatch } from 'match-values'
 
 const pattern = {
-  h1: 20,
-  h2: 18,
-  title: 16,
-  description: 14,
-  _: 13
+  small: 12,
+  medium: 16,
+  large: 20,
+  _: 14
 }
 
-const fontSizes = ['h1', 'h2', 'x'].map(lazyMatch(pattern)) // [20, 18, 13]
-const getFinalFontSize = compose(
-  (size) => size + 1,
+// Use with arrays
+const sizes = ['small', 'medium', 'large'].map(lazyMatch(pattern))
+// Returns: [12, 16, 20]
+
+// Use with function composition
+const getFinalSize = compose(
+  size => size + 2,
   lazyMatch(pattern),
-  (font) => font.size
-)({
-  size: 'description'
-}) // 15
+  item => item.size
+)({ size: 'medium' })
+// Returns: 18
 ```
 
-### Match conditions
+## API Reference
 
-```ts
-import { match, last } from 'match-values'
+### Main Functions
 
-const pattern = {
-  [x => x < 4, 'Basic'],
-  [x => x.rating === 4, 'Silver'],
-  [x => x.rating >= 5, 'Gold'],
-  [last, 'Unknown']
-}
-match({ name: 'John 1', rating: 5 }, pattern) // Gold
-match({ name: 'John 2', rating: 4 }, pattern) // Silver
-match({ name: 'John 3', rating: 1 }, pattern) // Basic
-match({ name: 'John 4' }, pattern) // Unknown
-```
+- `match(value, pattern)`: Matches a value against a pattern and returns the result
+- `lazyMatch(pattern)`: Creates a function that can be used for lazy matching
+- `last`: Special value for the default case in conditional matching
+
+### Pattern Syntax
+
+- Literal values: `{ key: value }`
+- Functions: `{ key: () => value }`
+- Conditions: `{ [predicate]: value }`
+- Default case: Use `_` or `last`
 
 ## Code Coverage
 
-[Test Report](https://locphan87.github.io/match-values/)
+[View Test Report](https://locphan87.github.io/match-values/)
 
-## Licensing
+## License
 
 MIT
