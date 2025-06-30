@@ -1,6 +1,6 @@
 {
   "name": "match-values",
-  "version": "2.1.2",
+  "version": "3.0.0",
   "description": "Apply pattern matching in JavaScript",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
