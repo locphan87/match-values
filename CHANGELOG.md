@@ -1,3 +1,18 @@
+### `v3.1.0` - Pattern Helpers & Sharper Type Inference
+
+This release adds ergonomic helpers for building patterns and improves return-type inference across the matching functions. It is backward compatible at runtime.
+
+#### 🚀 Features
+
+*   **New `pattern()` helper**: Define an object pattern with full literal type inference, so `match` can infer the exact union of possible results without explicit generic annotations.
+*   **New `withDefault()` helper**: Add a default case to an object pattern without writing the `[last]` key inline — e.g. `withDefault({ active: 'green' } as const, 'grey')`.
+*   **New `cond()` helper**: Define a conditional pattern with full literal type inference for branch results.
+*   **Sharper inference**: `match`, `lazyMatch`, and `matchCond` now infer their return type as the precise union of pattern values instead of a single widened type. New exported helper types: `AllPatternValues`, `MatchResult`, and `InferCondResult`.
+
+#### ⚠️ Note
+
+*   The generic signatures of `match` and `lazyMatch` were reworked. Idiomatic usage (`match(key, pattern)`) is unaffected and now infers more precisely. If you previously passed **explicit** type arguments (e.g. `match<string, number>(...)`), update those call sites to rely on inference.
+
 ### `v3.0.0` - Modern, Type-Safe, and Consistent
 
 This release marks a major milestone for `match-values`, focusing on full TypeScript support, a more consistent API, and an improved developer experience.
