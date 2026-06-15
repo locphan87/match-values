@@ -12,6 +12,7 @@
     "prebuild": "rm -rf dist",
     "build": "tsc",
     "prepublish": "yarn build",
+    "typecheck": "tsc --noEmit -p tsconfig.types.json",
     "test": "jest",
     "test:cov": "open ./coverage/lcov-report/index.html",
     "test:report": "open ./test-report.html"

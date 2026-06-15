@@ -1,8 +1,16 @@
-const { match, lazyMatch, last, matchCond } = require('../dist/index');
+const {
+  match,
+  lazyMatch,
+  last,
+  matchCond,
+  pattern: definePattern,
+  withDefault,
+  cond,
+} = require('../dist/index');
 
 describe('match', () => {
   // Updated patterns to use the `last` symbol for default cases
-  const pattern = {
+  const patterns = {
     format: {
       h1: 20,
       h2: 18,
@@ -48,15 +56,15 @@ describe('match', () => {
     describe('successful matches', () => {
       it('should match exact values and default cases', () => {
         // Exact matches
-        expect(match('h1', pattern.format)).toBe(20);
-        expect(match('h2', pattern.format)).toBe(18);
-        expect(match('title', pattern.format)).toBe(16);
-        expect(match('description', pattern.format)).toBe(14);
-        expect(match(1, pattern.number)).toBe('a');
+        expect(match('h1', patterns.format)).toBe(20);
+        expect(match('h2', patterns.format)).toBe(18);
+        expect(match('title', patterns.format)).toBe(16);
+        expect(match('description', patterns.format)).toBe(14);
+        expect(match(1, patterns.number)).toBe('a');
 
         // Default matches
-        expect(match('unknown', pattern.format)).toBe(13);
-        expect(match(99, pattern.number)).toBe('any');
+        expect(match('unknown', patterns.format)).toBe(13);
+        expect(match(99, patterns.number)).toBe('any');
       });
     });
 
@@ -73,19 +81,19 @@ describe('match', () => {
     describe('successful matches', () => {
       it('should match various condition types', () => {
         // Exact condition
-        expect(match(5, pattern.cond)).toBe('ok');
+        expect(match(5, patterns.cond)).toBe('ok');
 
         // Numeric conditions
-        expect(match(6, pattern.cond)).toBe('great');
-        expect(match(10, pattern.cond)).toBe('great');
+        expect(match(6, patterns.cond)).toBe('great');
+        expect(match(10, patterns.cond)).toBe('great');
 
         // Object conditions
-        expect(match({ name: 'Smith' }, pattern.cond)).toBe('Hello');
-        expect(match({ name: 'Marie' }, pattern.cond)).toBe('Bonjour');
+        expect(match({ name: 'Smith' }, patterns.cond)).toBe('Hello');
+        expect(match({ name: 'Marie' }, patterns.cond)).toBe('Bonjour');
 
         // Default cases
-        expect(match(4, pattern.cond)).toBe('default');
-        expect(match({ name: 'John' }, pattern.cond)).toBe('default');
+        expect(match(4, patterns.cond)).toBe('default');
+        expect(match({ name: 'John' }, patterns.cond)).toBe('default');
       });
     });
 
@@ -116,21 +124,48 @@ describe('match', () => {
     });
   });
 
+  describe('pattern helpers', () => {
+    it('should support pattern(), withDefault(), and cond()', () => {
+      const format = definePattern({
+        h1: 20,
+        h2: 18,
+        [last]: 13,
+      });
+
+      expect(match('h1', format)).toBe(20);
+      expect(match('unknown', format)).toBe(13);
+
+      const colors = withDefault({ active: 'green', pending: 'orange' }, 'grey');
+      expect(match('active', colors)).toBe('green');
+      expect(match('blocked', colors)).toBe('grey');
+
+      const tiers = cond([
+        [(points) => points >= 500, 'Gold'],
+        [(points) => points >= 100, 'Silver'],
+        [last, 'Bronze'],
+      ]);
+
+      expect(match(600, tiers)).toBe('Gold');
+      expect(match(50, tiers)).toBe('Bronze');
+      expect(lazyMatch(tiers)(150)).toBe('Silver');
+    });
+  });
+
   describe('lazy matching', () => {
     it('should support lazy evaluation and function composition', () => {
       // Lazy evaluation with object pattern
-      const getFontSize = lazyMatch(pattern.format);
+      const getFontSize = lazyMatch(patterns.format);
       expect(getFontSize('h1')).toBe(20);
       expect(getFontSize('h2')).toBe(18);
       expect(getFontSize('unknown')).toBe(13);
 
       // Lazy evaluation with conditional pattern
-      const getStatus = lazyMatch(pattern.cond);
+      const getStatus = lazyMatch(patterns.cond);
       expect(getStatus(5)).toBe('ok');
       expect(getStatus({ name: 'John' })).toBe('default');
 
       // Array transformations
-      const results = ['h1', 'h2', 'unknown'].map(lazyMatch(pattern.format));
+      const results = ['h1', 'h2', 'unknown'].map(lazyMatch(patterns.format));
       expect(results).toEqual([20, 18, 13]);
     });
   });

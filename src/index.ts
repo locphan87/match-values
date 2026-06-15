@@ -4,7 +4,31 @@
  */
 export const last = Symbol('last');
 
-// --- TYPE DEFINITIONS ---
+// --- TYPE UTILITIES ---
+
+type OmitLastKey<P> = Omit<P, typeof last>;
+
+/** Union of all possible return values from an object pattern. */
+export type AllPatternValues<P> =
+  | (keyof OmitLastKey<P> extends infer K ? (K extends keyof P ? P[K] : never) : never)
+  | (typeof last extends keyof P ? P[typeof last] : never);
+
+/** Result type for a specific search key against an object pattern. */
+export type MatchResult<P, K> = K extends keyof OmitLastKey<P>
+  ? P[K]
+  : typeof last extends keyof P
+    ? P[typeof last]
+    : AllPatternValues<P>;
+
+type CondBranch = readonly [unknown, unknown];
+
+/** Infer the union of result types from a conditional pattern array. */
+export type InferCondResult<P extends readonly CondBranch[]> = P[number][1];
+
+type ObjectPatternInput = Record<string | number, unknown> & { [last]?: unknown };
+type CondPatternInput = readonly CondBranch[];
+
+// --- LEGACY TYPE DEFINITIONS (backward compatible) ---
 
 /**
  * A pattern for matching against literal string or number values.
@@ -28,24 +52,63 @@ type Predicate<T> = (value: T) => boolean;
  */
 export type ConditionalPattern<T, R> = Array<[Predicate<T> | typeof last, R]>;
 
+// --- PATTERN HELPERS ---
+
+/**
+ * Defines an object pattern with full literal type inference.
+ * Use this when defining reusable patterns to avoid explicit generic annotations.
+ *
+ * @example
+ * const status = pattern({ 200: 'OK', 404: 'Not Found', [last]: 'Unknown' } as const);
+ * match(200, status); // 'OK' | 'Not Found' | 'Unknown'
+ */
+export function pattern<const P extends ObjectPatternInput>(p: P): P {
+  return p;
+}
+
+/**
+ * Adds a default case to an object pattern without using the `[last]` syntax inline.
+ *
+ * @example
+ * const colors = withDefault({ active: 'green', pending: 'orange' } as const, 'grey');
+ * match('active', colors); // 'green' | 'orange' | 'grey'
+ */
+export function withDefault<const P extends Record<string | number, unknown>, const D>(
+  cases: P,
+  defaultValue: D
+): P & { [last]: D } {
+  return { ...cases, [last]: defaultValue };
+}
+
+/**
+ * Defines a conditional pattern with full literal type inference.
+ *
+ * @example
+ * const tiers = cond([
+ *   [(p) => p >= 500, 'Gold'],
+ *   [(p) => p >= 100, 'Silver'],
+ *   [last, 'Bronze'],
+ * ] as const);
+ */
+export function cond<const P extends CondPatternInput>(branches: P): P {
+  return branches;
+}
+
 // --- PRIVATE IMPLEMENTATION ---
 
 /**
  * Matches a literal value against an object pattern.
  */
-const matchValue = <T extends string | number, R>(
+const matchValue = <T extends string | number>(
   searchKey: T,
-  pattern: ObjectPattern<R>
-): R => {
-  // The `as any` is a pragmatic concession to TypeScript's difficulty in
-  // precisely typing an object with both arbitrary string/number keys and a symbol key.
-  // The `in` operator provides the runtime safety.
+  pattern: ObjectPatternInput
+): unknown => {
   if (searchKey in pattern) {
-    return (pattern as any)[searchKey];
+    return (pattern as Record<string | number, unknown>)[searchKey];
   }
 
   if (last in pattern) {
-    return pattern[last] as R;
+    return pattern[last];
   }
 
   throw new ReferenceError(`Match error: No matching case for search key "${searchKey}"`);
@@ -54,10 +117,7 @@ const matchValue = <T extends string | number, R>(
 /**
  * Matches a value against a series of conditional branches.
  */
-const matchCond = <T, R>(
-  searchKey: T,
-  pattern: ConditionalPattern<T, R>
-): R => {
+const matchCondImpl = <T>(searchKey: T, pattern: CondPatternInput): unknown => {
   const lastIndex = pattern.length - 1;
 
   for (let i = 0; i < pattern.length; i++) {
@@ -84,7 +144,7 @@ const matchCond = <T, R>(
       );
     }
 
-    if (predicate(searchKey)) {
+    if ((predicate as Predicate<T>)(searchKey)) {
       return value;
     }
   }
@@ -101,31 +161,37 @@ const matchCond = <T, R>(
  * Can be used for both literal and conditional matching.
  *
  * @example
- * // Literal matching
- * match(200, { 200: 'OK', 404: 'Not Found', [last]: 'Unknown' }); // 'OK'
+ * // Literal matching with inferred return type
+ * const status = pattern({ 200: 'OK', 404: 'Not Found', [last]: 'Unknown' } as const);
+ * match(200, status); // 'OK' | 'Not Found' | 'Unknown'
  *
  * @example
  * // Conditional matching
  * match(15, [
  *   [(x) => x > 10, 'large'],
  *   [(x) => x <= 10, 'small'],
- * ]); // 'large'
+ * ]); // 'large' | 'small'
  *
  * @param searchKey The value to match against the pattern.
  * @param pattern The pattern, either an object for literal matching or an array for conditional matching.
  * @returns The value from the first matching case.
  */
-export function match<T extends string | number, R>(searchKey: T, pattern: ObjectPattern<R>): R;
-export function match<T, R>(searchKey: T, pattern: ConditionalPattern<T, R>): R;
-export function match<T, R>(
+export function match<
+  const P extends ObjectPatternInput,
+  const K extends string | number
+>(searchKey: K, pattern: P): MatchResult<P, K>;
+export function match<T, const P extends CondPatternInput>(
   searchKey: T,
-  pattern: ObjectPattern<R> | ConditionalPattern<T, R>
-): R {
+  pattern: P
+): InferCondResult<P>;
+export function match<T>(
+  searchKey: T,
+  pattern: ObjectPatternInput | CondPatternInput
+): unknown {
   if (Array.isArray(pattern)) {
-    return matchCond(searchKey, pattern as ConditionalPattern<T, R>);
+    return matchCondImpl(searchKey, pattern);
   }
-  // TypeScript needs a little help with the type assertion here due to the overloads.
-  return matchValue(searchKey as string | number, pattern as ObjectPattern<R>);
+  return matchValue(searchKey as string | number, pattern as ObjectPatternInput);
 }
 
 /**
@@ -133,24 +199,41 @@ export function match<T, R>(
  * Useful for function composition and creating reusable matching logic.
  *
  * @example
- * const getStatus = lazyMatch({ 200: 'OK', 404: 'Not Found', [last]: 'Unknown' });
- * getStatus(404); // 'Not Found'
+ * const status = pattern({ 200: 'OK', 404: 'Not Found', [last]: 'Unknown' } as const);
+ * const getStatus = lazyMatch(status);
+ * getStatus(404); // 'OK' | 'Not Found' | 'Unknown'
  *
  * @param pattern The pattern to use for matching.
  * @returns A new function that takes a searchKey and returns a matched value.
  */
-export function lazyMatch<T extends string | number, R>(pattern: ObjectPattern<R>): (searchKey: T) => R;
-export function lazyMatch<T, R>(pattern: ConditionalPattern<T, R>): (searchKey: T) => R;
-export function lazyMatch<T, R>(
-  pattern: ObjectPattern<R> | ConditionalPattern<T, R>
-) {
-  // The `as any` here is acceptable because the public-facing overloads
-  // provide the necessary type safety for consumers of the function.
-  return (searchKey: T) => match(searchKey as any, pattern as any);
+export function lazyMatch<const P extends ObjectPatternInput>(
+  pattern: P
+): <K extends string | number>(searchKey: K) => MatchResult<P, K>;
+export function lazyMatch<T, const P extends CondPatternInput>(
+  pattern: P
+): (searchKey: T) => InferCondResult<P>;
+export function lazyMatch(pattern: ObjectPatternInput | CondPatternInput) {
+  return (searchKey: unknown) => match(searchKey as never, pattern as never);
 }
 
-// Export `matchCond` separately for users who may want only conditional matching.
-export { matchCond };
+/**
+ * Matches a value against a series of conditional branches.
+ *
+ * @param searchKey The value to match against the pattern.
+ * @param pattern An array of `[predicate, result]` tuples.
+ * @returns The value from the first matching branch.
+ */
+export function matchCond<T, const P extends CondPatternInput>(
+  searchKey: T,
+  pattern: P
+): InferCondResult<P>;
+export function matchCond<T, R>(searchKey: T, pattern: ConditionalPattern<T, R>): R;
+export function matchCond<T>(
+  searchKey: T,
+  pattern: CondPatternInput | ConditionalPattern<T, unknown>
+): unknown {
+  return matchCondImpl(searchKey, pattern as CondPatternInput);
+}
 
 // Default export `match` for convenience.
 export default match;
